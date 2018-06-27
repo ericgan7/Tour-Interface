@@ -1,0 +1,90 @@
+
+
+<Interface>:  
+    param: parameters
+
+    GridLayout:
+        id: parameters
+        status: status
+
+        cols: 2
+        rows: 5
+        top: root.top
+        x: root.x + 50
+        size: 500, 200
+
+        Label:
+            id : header
+            font_size: 30
+            text: 'Parameters'
+
+        Label:
+            id: status
+            text: 'STATUS: IDLE'
+
+        Label:
+            id: header_delta
+            font_size: 24
+            text: 'Delta: '
+
+        TextInput:
+            id: idelta
+            font_size: 24
+            text: '0.2'
+            multiline: False
+
+        Label:
+            id: header_dataSet
+            font_size: 24
+            text: 'Dataset Size: '
+
+        TextInput:
+            id: idataSet
+            font_size: 24
+            text: '5'
+            multiline: False
+
+        Button:
+            size: 50, 50
+            text: 'RUN'
+            on_press: root.runData(idelta.text, idataSet.text)
+
+        Label:
+
+        Button:
+            text: 'Download Parameters'
+            on_press: root.saveDialog('PARAM')
+
+        Button:
+            text: 'Download Tour Data'
+            on_press: root.saveDialog('DATA')
+
+<SaveFiles>:
+    file_name: file_name
+    fileviewer: fileview
+
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+
+        FileChooserListView:
+            id: fileview
+            on_selection: file_name.text = self.selection and self.selection[0] or ''
+
+        TextInput:
+            id: file_name
+            size_hint_y: None
+            height: 30
+            multiline: False
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.save(file_name.text, fileview.path)

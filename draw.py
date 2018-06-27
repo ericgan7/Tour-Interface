@@ -1,9 +1,11 @@
 
 import csv
+import os
 import random
 
 class draw(object):
     def __init__(self):
+        '''
         self.pfile = 'OUTPUT_PARAMETERS.csv'
         self.outp_file = open(self.pfile, 'w', newline = '')
         self.outp = csv.writer(self.outp_file, delimiter = ',')
@@ -15,7 +17,8 @@ class draw(object):
         self.outd_file = open(self.dfile, 'w', newline= '')
         self.outd = csv.writer(self.outd_file, delimiter = ',')
         self.outd.writerow(["TOUR ID", "DELTA", None])
-        
+        '''
+
         self.tourset = None
         self.input_file = None
         self.input = None
@@ -24,12 +27,14 @@ class draw(object):
         self.params = []
         self.dist = []
         self.tour = []
-        self.d2 = 0
-        self.d3 = 0
+        self.d = 0
+
+        self.parameters = [["TOURSET", "DISTRIBUTIONS", None,
+                             "ALPHA", "BETA", "GAMMA", None, 
+                             "RANDOM", "DELTA", None]]
+        self.data = [["TOUR ID", "DELTA", None]]
         
-        
-    def run(self, tourID):
-        #import pdb; pdb.set_trace()
+    def run(self, tourID, delta):
         isParam = True
         length = 0
         for i, row in enumerate(self.input_file):
@@ -49,44 +54,36 @@ class draw(object):
             for i in range(length):
                 self.tour[i].append(result[i])
             
-        index = self.random()
-        try:
-            self.outp.writerow([tourID] + self.dist[0] + [None] + self.params[0] + [None, index, self.d2, self.d3, None])
-        except IndexError:
-            import pdb; pdb.set_trace()
+        index = self.random(delta)
+        self.parameters.append([tourID] + self.dist[self.d] + [None] + self.params[0] + [None, index, self.d, None])
         for i, row in enumerate(self.params):
             if i == 0:
                 continue
-            self.outp.writerow([None] + self.dist[i] + [None] + self.params[i])
-        self.outp.writerow([])
-        
-        self.outd.writerow([tourID, '0.2'] + self.tour[self.d2])
-        self.outd.writerow([None, '0.3'] + self.tour[self.d3])
-        self.outd.writerow([])
+            self.parameters.append([None] + self.dist[i] + [None] + self.params[i])
+        self.parameters.append([])
+        try:
+            self.data.append([tourID, delta] + self.tour[self.d])
+        except IndexError:
+            import pdb; pdb.set_trace()
+        self.data.append([])
             
-    def random(self):
+    def random(self, delta):
         index = random.random()
         total = 0
+        delta_index = 0
+        if (delta == '0.2'):
+            delta_index = 0
+        else:
+            delta_index = 1
         for i, d in enumerate(self.dist):
-            total += float(d[0])
+            total += float(d[delta_index])
             if total >= index:
-                self.d2 = i
+                self.d = i
                 break
         total = 0
-        for i, d in enumerate(self.dist):
-            total += float(d[1])
-            if total >= index:
-                self.d3 = i
-                break
         return index
-    
-    def end(self):
-        self.input_file.close()
-        self.outp_file.close()
-        self.outd_file.close()
-        print("DONE")
         
-    def new(self, file, tourid):
+    def new(self, file, delta):
         random.seed()
         self.tourset = file + '.csv'
         self.input_file = open(self.tourset, 'r', newline = '')
@@ -95,6 +92,27 @@ class draw(object):
         self.params = []
         self.input = []
         self.tour = []
-        
-        self.run(tourid)
+        self.dist = []
+
+    def reset(self):
+        self.parameters = [["TOURSET", "DISTRIBUTIONS 0.2", "DISTRIBUTIONS 0.3", None, 
+                             "ALPHA", "BETA", "GAMMA", None, 
+                             "RANDOM", "DELTA " + delta, None]]
+        self.data = [["TOUR ID", "DELTA", None]]
+
+    def write(self, type, name, directory):
+        if name[-4:] != '.csv':
+            name = name + '.csv'
+        import pdb; pdb.set_trace()
+        with open(os.path.join(directory, name), 'w', newline = '') as stream:
+            output = csv.writer(stream, delimiter = ',')
+            if type == 'DATA':
+                for row in self.data:
+                    output.writerow(row)
+            elif type == "PARAM":
+                for row in self.parameters:
+                    output.writerow(row)
+            stream.close()
+
+
         
