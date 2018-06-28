@@ -3,13 +3,14 @@
 <Interface>:  
     param: parameters
 
-    GridLayout:
+    Parameters:
         id: parameters
         status: status
+        inputdelta: idelta
 
         cols: 2
         rows: 5
-        top: root.top
+        top: root.top - 50
         x: root.x + 50
         size: 500, 200
 
@@ -20,18 +21,17 @@
 
         Label:
             id: status
-            text: 'STATUS: IDLE'
+            text: 'STATUS: START'
 
         Label:
             id: header_delta
             font_size: 24
             text: 'Delta: '
 
-        TextInput:
+        Button:
             id: idelta
             font_size: 24
             text: '0.2'
-            multiline: False
 
         Label:
             id: header_dataSet
@@ -88,3 +88,21 @@
             Button:
                 text: "Save"
                 on_release: root.save(file_name.text, fileview.path)
+
+<DropDownSelection>:
+    id: dropdown
+
+    Button:
+        id: delta2
+        size_hint_y: None
+        height: 25
+        text: '0.2'
+        on_release: dropdown.select(self)
+    Button:
+        id: delta3
+        size_hint_y: None
+        height: 25
+        text: '0.3'
+        on_release: dropdown.select(self)
+
+

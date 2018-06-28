@@ -28,6 +28,7 @@ class draw(object):
         self.dist = []
         self.tour = []
         self.d = 0
+        self.delta = 0
 
         self.parameters = [["TOURSET", "DISTRIBUTIONS", None,
                              "ALPHA", "BETA", "GAMMA", None, 
@@ -55,11 +56,11 @@ class draw(object):
                 self.tour[i].append(result[i])
             
         index = self.random(delta)
-        self.parameters.append([tourID] + self.dist[self.d] + [None] + self.params[0] + [None, index, self.d, None])
+        self.parameters.append([tourID, self.dist[0][self.delta], None] + self.params[0] + [None, index, self.d, None])
         for i, row in enumerate(self.params):
             if i == 0:
                 continue
-            self.parameters.append([None] + self.dist[i] + [None] + self.params[i])
+            self.parameters.append([None, self.dist[i][self.delta], None] + self.params[i])
         self.parameters.append([])
         try:
             self.data.append([tourID, delta] + self.tour[self.d])
@@ -70,13 +71,12 @@ class draw(object):
     def random(self, delta):
         index = random.random()
         total = 0
-        delta_index = 0
         if (delta == '0.2'):
-            delta_index = 0
+            self.delta = 0
         else:
-            delta_index = 1
+            self.delta = 1
         for i, d in enumerate(self.dist):
-            total += float(d[delta_index])
+            total += float(d[self.delta])
             if total >= index:
                 self.d = i
                 break
@@ -94,25 +94,27 @@ class draw(object):
         self.tour = []
         self.dist = []
 
-    def reset(self):
-        self.parameters = [["TOURSET", "DISTRIBUTIONS 0.2", "DISTRIBUTIONS 0.3", None, 
+    def reset(self, delta):
+        self.parameters = [["TOURSET", "DISTRIBUTIONS "+ delta, None, 
                              "ALPHA", "BETA", "GAMMA", None, 
-                             "RANDOM", "DELTA " + delta, None]]
+                             "RANDOM", "DELTA " + delta]]
         self.data = [["TOUR ID", "DELTA", None]]
 
     def write(self, type, name, directory):
         if name[-4:] != '.csv':
             name = name + '.csv'
-        import pdb; pdb.set_trace()
-        with open(os.path.join(directory, name), 'w', newline = '') as stream:
-            output = csv.writer(stream, delimiter = ',')
-            if type == 'DATA':
-                for row in self.data:
-                    output.writerow(row)
-            elif type == "PARAM":
-                for row in self.parameters:
-                    output.writerow(row)
-            stream.close()
+        try:
+            with open(os.path.join(directory, name), 'w', newline = '') as stream:
+                output = csv.writer(stream, delimiter = ',')
+                if type == 'DATA':
+                    for row in self.data:
+                        output.writerow(row)
+                elif type == "PARAM":
+                    for row in self.parameters:
+                        output.writerow(row)
+                stream.close()
+        except PermissionError:
+            raise PermissionError
 
 
         
